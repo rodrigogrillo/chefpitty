@@ -326,21 +326,19 @@
     .lightbox-close { top: 10px; right: 10px; }
   }
 
-  /* ---------- serviços ---------- */
-  .serv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .serv-card {
+  /* ---------- serviços / tipos de evento ---------- */
+  .serv-tags { display: flex; flex-wrap: wrap; gap: 12px; }
+  .serv-tags .tag {
     border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    background: var(--card);
+    color: var(--ink-muted);
+    padding: 11px 20px;
+    border-radius: 30px;
+    font-size: 0.92rem;
+    transition: border-color .2s, color .2s;
   }
-  .serv-card h3 { font-size: 1.15rem; }
-  .serv-card p { color: var(--ink-muted); font-size: 0.92rem; }
-  .serv-card .preco { margin-top: auto; padding-top: 14px; font-size: 0.85rem; color: var(--gold-soft); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-  .serv-card .preco:hover { color: var(--gold); }
-  @media (max-width: 700px) { .serv-grid { grid-template-columns: 1fr; } }
+  .serv-tags .tag:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+  .serv-cta { display: inline-block; margin-top: 36px; }
 
   /* ---------- menu degustação ---------- */
   .menu-list { max-width: 680px; }
@@ -506,6 +504,14 @@
   </div>
 </section>
 
+<!-- ===== O QUE FAZ UM PERSONAL CHEF ===== -->
+<section class="block wrap" id="personal-chef">
+  <div class="block-head reveal" style="max-width:720px;">
+    <h2>O que faz um personal chef</h2>
+    <p>Como o próprio nome sugere, é um chef que atua de forma personalizada, privada, familiar ou pessoal, atendendo às necessidades de cada cliente em termos de cardápio, dia, horário e local, definidos no momento da contratação.</p>
+  </div>
+</section>
+
 <!-- ===== SOBRE ===== -->
 <section class="block sobre wrap" id="sobre">
   <div class="reveal">
@@ -514,7 +520,7 @@
   <div class="sobre-text reveal">
     <h2>Sobre o Chef Pitty</h2>
     <p>Desde cedo, em [Cidade], Pitty descobriu na cozinha uma forma de cuidar das pessoas. Formou-se em [Escola de Gastronomia] e passou por cozinhas como [Restaurante A] e [Restaurante B], onde amadureceu um jeito próprio de cozinhar, em que a técnica está a serviço do afeto.</p>
-    <p>Hoje atua como personal chef, criando menus exclusivos para jantares íntimos, eventos e celebrações. Cada cardápio é pensado sob medida, com propósito, para criar experiências que marcam.</p>
+    <p>Hoje, seu propósito é oferecer alta gastronomia em um serviço exclusivo e personalizado, criando experiências gastronômicas únicas, diferenciadas e surpreendentes, para que cada convidado se sinta verdadeiramente especial.</p>
     <p class="assinatura">"Comida com afeto & propósito."</p>
   </div>
 </section>
@@ -626,34 +632,26 @@
   <div class="lightbox-count" id="lbCount"></div>
 </div>
 
-<!-- ===== SERVIÇOS ===== -->
+<!-- ===== SERVIÇOS / TIPOS DE EVENTO ===== -->
 <section class="block wrap" id="servicos">
   <div class="block-head reveal">
-    <h2>Serviços</h2>
-    <p>Formatos de atendimento disponíveis.</p>
+    <h2>Para cada tipo de evento</h2>
+    <p>Atendimento personalizado do menu ao serviço à mesa, no formato que a ocasião pede.</p>
   </div>
-  <div class="serv-grid">
-    <div class="serv-card reveal">
-      <h3>Chef à domicílio</h3>
-      <p>Jantar completo preparado na sua casa, do preparo ao serviço à mesa, para até [X] convidados.</p>
-      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Consultar disponibilidade →</a>
-    </div>
-    <div class="serv-card reveal">
-      <h3>Eventos e celebrações</h3>
-      <p>Menus para aniversários, casamentos e confraternizações corporativas.</p>
-      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar sobre o evento →</a>
-    </div>
-    <div class="serv-card reveal">
-      <h3>Aulas particulares</h3>
-      <p>Aulas individuais ou em grupo, presenciais, com foco em técnicas específicas.</p>
-      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Consultar disponibilidade →</a>
-    </div>
-    <div class="serv-card reveal">
-      <h3>Consultoria de menu</h3>
-      <p>Desenvolvimento e revisão de cardápio para restaurantes e negócios do setor.</p>
-      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar com o chef →</a>
-    </div>
+  <div class="serv-tags reveal">
+    <span class="tag">Personal chef para residências</span>
+    <span class="tag">Casamentos</span>
+    <span class="tag">Aniversários</span>
+    <span class="tag">Festa de debutantes</span>
+    <span class="tag">Jantares de formatura</span>
+    <span class="tag">Eventos corporativos</span>
+    <span class="tag">Coffee break</span>
+    <span class="tag">Coquetéis</span>
+    <span class="tag">Confraria</span>
+    <span class="tag">Finger food</span>
+    <span class="tag">Churrascos</span>
   </div>
+  <a class="btn-primary serv-cta" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar sobre o seu evento</a>
 </section>
 
 <!-- ===== MENU DEGUSTAÇÃO ===== -->
@@ -736,7 +734,7 @@
 <section class="block wrap contato" id="contato">
   <div class="contato-info reveal">
     <h2>Vamos planejar seu evento</h2>
-    <p>Conte um pouco sobre a ocasião e retornamos com uma proposta de cardápio.</p>
+    <p>Conte um pouco sobre a ocasião e receba uma proposta personalizada, feita para transformar o momento em um evento memorável.</p>
     <div class="contato-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5a2 2 0 0 1 2-2h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 12l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg>
       +55 17 99731-0535
