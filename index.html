@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chef Pitty | Cozinha Autoral</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="assets/favicon.png" type="image/png" sizes="144x144">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #17120E;
+    --bg-alt: #1F1913;
+    --card: #251E17;
+    --ink: #F3EBDD;
+    --ink-muted: #B9AC96;
+    --ink-faint: #7D7362;
+    --gold: #C68E39;
+    --gold-soft: #E2AC5A;
+    --herb: #2A6F4F;
+    --line: rgba(243,235,221,0.12);
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans: "Public Sans", -apple-system, Segoe UI, sans-serif;
+    --maxw: 1160px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .eyebrow-hide { } /* intentionally not using tracked-out eyebrows everywhere */
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; }
+
+  /* ---------- placeholder photo blocks ---------- */
+  .ph {
+    position: relative;
+    background: linear-gradient(155deg, #2C2013, #191410 70%);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .ph.has-photo { padding: 0; }
+  .ph.has-photo::before { display: none; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+  .ph::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(135deg, transparent 0 18px, rgba(243,235,221,0.035) 18px 19px);
+  }
+  .ph span { position: relative; z-index: 1; max-width: 220px; }
+
+  /* ---------- header ---------- */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(23,18,14,0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo em { font-style: normal; color: var(--gold-soft); }
+  .logo img { height: 34px; width: auto; display: block; }
+  nav.menu { display: flex; gap: 28px; }
+  nav.menu a { font-size: 0.92rem; color: var(--ink-muted); transition: color .2s; }
+  nav.menu a:hover { color: var(--gold-soft); }
+  .cta-wa {
+    background: var(--herb);
+    color: #F3EBDD;
+    padding: 10px 20px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .menu-toggle { display: none; background: none; border: none; color: var(--ink); font-size: 1.6rem; cursor: pointer; }
+
+  @media (max-width: 860px) {
+    nav.menu { display: none; }
+    .menu-toggle { display: block; }
+    .cta-wa { padding: 9px 14px; font-size: 0.8rem; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 168px 0 90px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.82rem;
+    color: var(--gold-soft);
+    border: 1px solid rgba(196,146,46,0.4);
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.08;
+    color: var(--ink);
+  }
+  .hero p.sub {
+    margin-top: 20px;
+    font-size: 1.08rem;
+    color: var(--ink-muted);
+    max-width: 46ch;
+  }
+  .hero-actions { display: flex; gap: 14px; margin-top: 34px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold);
+    color: #1A140D;
+    padding: 13px 26px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 0.94rem;
+  }
+  .btn-outline {
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 13px 26px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.94rem;
+  }
+  .hero-photo .ph { aspect-ratio: 4/5; border-radius: 4px; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding: 128px 0 56px; gap: 34px; }
+    .hero-photo { order: -1; }
+    .hero-photo .ph { aspect-ratio: 16/10; }
+  }
+
+  /* ---------- diferenciais ---------- */
+  .diferenciais {
+    background: var(--bg-alt);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 46px 0;
+  }
+  .dif-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+  .dif-item { display: flex; gap: 14px; align-items: flex-start; }
+  .dif-item svg { flex-shrink: 0; width: 26px; height: 26px; color: var(--gold-soft); }
+  .dif-item h3 { font-size: 0.98rem; font-family: var(--sans); font-weight: 700; margin-bottom: 4px; }
+  .dif-item p { font-size: 0.86rem; color: var(--ink-muted); }
+  @media (max-width: 860px) { .dif-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .dif-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- section generic ---------- */
+  section.block { padding: 96px 0; }
+  .block-head { max-width: 640px; margin-bottom: 52px; }
+  .block-head h2 { font-size: clamp(1.9rem, 3.4vw, 2.5rem); }
+  .block-head p { color: var(--ink-muted); margin-top: 14px; font-size: 1.02rem; }
+
+  /* ---------- sobre ---------- */
+  .sobre { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 64px; align-items: center; }
+  .sobre .ph { aspect-ratio: 3/4; border-radius: 4px; }
+  .sobre-text p { color: var(--ink-muted); margin-bottom: 16px; max-width: 58ch; }
+  .sobre-text .assinatura { font-family: var(--serif); font-style: italic; color: var(--gold-soft); font-size: 1.3rem; margin-top: 26px; }
+  @media (max-width: 860px) { .sobre { grid-template-columns: 1fr; gap: 32px; } }
+
+  /* ---------- especialidades ---------- */
+  .esp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .esp-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 30px 26px;
+  }
+  .esp-card .num { font-family: var(--serif); font-size: 1rem; color: var(--gold-soft); margin-bottom: 14px; }
+  .esp-card h3 { font-size: 1.12rem; margin-bottom: 10px; }
+  .esp-card p { color: var(--ink-muted); font-size: 0.92rem; }
+  @media (max-width: 860px) { .esp-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- galeria / carousel ---------- */
+  .carousel-wrap { position: relative; }
+  .carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 20px;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .carousel-track::-webkit-scrollbar { display: none; }
+  .carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 720px) {
+    .carousel-slide { flex: 0 0 calc(33.333% - 14px); }
+  }
+  .carousel-slide .ph { aspect-ratio: 4/3; border-radius: 4px; }
+  .carousel-slide .cap { margin-top: 10px; font-size: 0.88rem; color: var(--ink-muted); }
+  .carousel-nav { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+  .carousel-nav button {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  .carousel-nav button:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+
+  /* ---------- serviços ---------- */
+  .serv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .serv-card {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .serv-card h3 { font-size: 1.15rem; }
+  .serv-card p { color: var(--ink-muted); font-size: 0.92rem; }
+  .serv-card .preco { margin-top: auto; padding-top: 14px; font-size: 0.85rem; color: var(--gold-soft); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .serv-card .preco:hover { color: var(--gold); }
+  @media (max-width: 700px) { .serv-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- menu degustação ---------- */
+  .menu-list { max-width: 680px; }
+  .menu-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .menu-row h4 { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; }
+  .menu-row p { color: var(--ink-muted); font-size: 0.86rem; margin-top: 4px; }
+  .menu-note { margin-top: 20px; font-size: 0.85rem; color: var(--ink-faint); }
+  .menu-cta { margin-top: 28px; }
+
+  /* ---------- avaliações ---------- */
+  .aval-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .aval-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+  }
+  .stars { color: var(--gold-soft); font-size: 0.9rem; margin-bottom: 10px; letter-spacing: 2px; }
+  .aval-card p { color: var(--ink-muted); font-size: 0.9rem; }
+  .aval-card .autor { margin-top: 14px; font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+  .ver-google { margin-top: 30px; display: inline-block; font-size: 0.9rem; color: var(--gold-soft); border-bottom: 1px solid rgba(226,183,92,0.4); }
+  @media (max-width: 860px) { .aval-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- onde atende ---------- */
+  .onde { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .onde .ph { aspect-ratio: 16/11; border-radius: 4px; }
+  .onde-list li { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--ink-muted); font-size: 0.96rem; display: flex; gap: 10px; align-items: center; }
+  .onde-list li svg { width: 16px; height: 16px; color: var(--gold-soft); flex-shrink: 0; }
+  @media (max-width: 860px) { .onde { grid-template-columns: 1fr; gap: 24px; } }
+
+  /* ---------- instagram ---------- */
+  .insta-band { background: var(--bg-alt); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 70px 0; text-align: center; }
+  .insta-band h2 { font-size: 1.7rem; }
+  .insta-band p { color: var(--ink-muted); margin-top: 10px; }
+  .insta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 34px; }
+  .insta-grid .ph { aspect-ratio: 1/1; border-radius: 3px; font-size: 0.7rem; }
+  .insta-link { display: inline-block; margin-top: 30px; color: var(--gold-soft); font-weight: 600; font-size: 0.94rem; }
+  @media (max-width: 700px) { .insta-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---------- contato ---------- */
+  .contato { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+  .contato-info h2 { font-size: clamp(1.9rem, 3.4vw, 2.5rem); margin-bottom: 16px; }
+  .contato-info p { color: var(--ink-muted); margin-bottom: 26px; max-width: 44ch; }
+  .contato-item { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .contato-item svg { width: 18px; height: 18px; color: var(--gold-soft); flex-shrink: 0; }
+  form.contato-form { display: flex; flex-direction: column; gap: 14px; }
+  form.contato-form input, form.contato-form textarea {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 13px 16px;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 0.94rem;
+  }
+  form.contato-form textarea { min-height: 110px; resize: vertical; }
+  form.contato-form button {
+    background: var(--gold);
+    color: #1A140D;
+    border: none;
+    padding: 14px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  @media (max-width: 860px) { .contato { grid-template-columns: 1fr; gap: 36px; } }
+
+  /* ---------- footer ---------- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 36px 0;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 10px; }
+  .footer-brand img { height: 26px; width: auto; display: block; opacity: 0.9; }
+  footer p { font-size: 0.82rem; color: var(--ink-faint); }
+  footer .foot-links { display: flex; gap: 20px; }
+  footer .foot-links a { font-size: 0.82rem; color: var(--ink-faint); }
+  footer .foot-links a:hover { color: var(--gold-soft); }
+
+  /* ---------- reveal (nunca opacity:0 por padrão — ver seção 7 do manual) ---------- */
+  .reveal { transform: translateY(20px); transition: transform .7s ease; }
+  .js-reveal .reveal.is-visible { transform: translateY(0); }
+
+  /* ---------- utilidades de marcação de placeholder pro cliente ---------- */
+  .flag {
+    display: inline-block;
+    background: rgba(196,146,46,0.14);
+    color: var(--gold-soft);
+    border: 1px dashed rgba(196,146,46,0.5);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body class="js-reveal">
+
+<header>
+  <div class="header-inner">
+    <div class="logo"><img src="assets/logo-icon.png" alt="Símbolo Chef Pitty">Chef <em>Pitty</em></div>
+    <nav class="menu">
+      <a href="#sobre">Sobre</a>
+      <a href="#especialidades">Especialidades</a>
+      <a href="#galeria">Galeria</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#depoimentos">Avaliações</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <a class="cta-wa" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar no WhatsApp</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero wrap">
+  <div class="hero-copy reveal">
+
+    <h1>Sabores que abraçam, experiências que marcam.</h1>
+    <p class="sub">Personal chef com foco em menus exclusivos. Comida feita com afeto e propósito, pensada para cada encontro.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#servicos">Ver serviços</a>
+      <a class="btn-outline" href="#contato">Falar com o Chef Pitty</a>
+    </div>
+  </div>
+  <div class="hero-photo reveal">
+    <div class="ph has-photo"><img src="assets/chef-hero.jpg" alt="Chef Pitty preparando um prato"></div>
+  </div>
+</section>
+
+<!-- ===== DIFERENCIAIS ===== -->
+<section class="diferenciais">
+  <div class="wrap dif-grid">
+    <div class="dif-item reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21V9a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v12"/><path d="M4 14h16"/></svg>
+      <div><h3>Menu exclusivo</h3><p>Cardápio criado sob medida para cada cliente e ocasião.</p></div>
+    </div>
+    <div class="dif-item reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <div><h3>Comida com afeto</h3><p>Cada prato pensado com cuidado e propósito.</p></div>
+    </div>
+    <div class="dif-item reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.9 6.3L21 9.3l-4.5 4.4 1 6.3L12 17l-5.5 3 1-6.3L3 9.3l6.1-1z"/></svg>
+      <div><h3>Formação renomada</h3><p>[X] anos de trajetória em cozinhas premiadas.</p></div>
+    </div>
+    <div class="dif-item reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+      <div><h3>Agenda flexível</h3><p>Atendimento em dias úteis, fins de semana e eventos.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOBRE ===== -->
+<section class="block sobre wrap" id="sobre">
+  <div class="reveal">
+    <div class="ph has-photo"><img src="assets/chef-sobre.jpg" alt="Retrato do Chef Pitty"></div>
+  </div>
+  <div class="sobre-text reveal">
+    <h2>Sobre o Chef Pitty</h2>
+    <p>Desde cedo, em [Cidade], Pitty descobriu na cozinha uma forma de cuidar das pessoas. Formou-se em [Escola de Gastronomia] e passou por cozinhas como [Restaurante A] e [Restaurante B], onde amadureceu um jeito próprio de cozinhar, em que a técnica está a serviço do afeto.</p>
+    <p>Hoje atua como personal chef, criando menus exclusivos para jantares íntimos, eventos e celebrações. Cada cardápio é pensado sob medida, com propósito, para criar experiências que marcam.</p>
+    <p class="assinatura">"Comida com afeto & propósito."</p>
+  </div>
+</section>
+
+<!-- ===== ESPECIALIDADES ===== -->
+<section class="block wrap" id="especialidades">
+  <div class="block-head reveal">
+    <h2>Um jeito próprio de cozinhar</h2>
+    <p>Três pilares por trás de cada menu exclusivo.</p>
+  </div>
+  <div class="esp-grid">
+    <div class="esp-card reveal">
+      <div class="num">01</div>
+      <h3>Afeto em cada prato</h3>
+      <p>Cozinha pensada para acolher, não apenas alimentar, quem está à mesa.</p>
+    </div>
+    <div class="esp-card reveal">
+      <div class="num">02</div>
+      <h3>Menus exclusivos</h3>
+      <p>Cardápio único, criado sob medida pra cada cliente e ocasião.</p>
+    </div>
+    <div class="esp-card reveal">
+      <div class="num">03</div>
+      <h3>Experiências que marcam</h3>
+      <p>Do planejamento ao serviço à mesa, cada detalhe pensado com propósito.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GALERIA / CARROSSEL ===== -->
+<section class="block wrap" id="galeria">
+  <div class="block-head reveal">
+    <h2>Galeria de pratos</h2>
+    <p>Uma seleção de criações recentes.</p>
+  </div>
+  <div class="carousel-wrap reveal">
+    <div class="carousel-track" id="carouselTrack">
+      <div class="carousel-slide">
+        <div class="ph"><span>[FOTO: prato 1]</span></div>
+        <p class="cap">Risoto de cogumelos selvagens com azeite trufado</p>
+      </div>
+      <div class="carousel-slide">
+        <div class="ph"><span>[FOTO: prato 2]</span></div>
+        <p class="cap">Cordeiro ao molho de ervas com purê de mandioquinha</p>
+      </div>
+      <div class="carousel-slide">
+        <div class="ph"><span>[FOTO: prato 3]</span></div>
+        <p class="cap">Sobremesa de chocolate 70% com frutas vermelhas</p>
+      </div>
+      <div class="carousel-slide">
+        <div class="ph"><span>[FOTO: prato 4]</span></div>
+        <p class="cap">Peixe branco grelhado com legumes da estação</p>
+      </div>
+      <div class="carousel-slide">
+        <div class="ph"><span>[FOTO: prato 5]</span></div>
+        <p class="cap">Entrada fria de tomates heirloom e burrata</p>
+      </div>
+    </div>
+    <div class="carousel-nav">
+      <button aria-label="Anterior" id="carPrev">←</button>
+      <button aria-label="Próximo" id="carNext">→</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVIÇOS ===== -->
+<section class="block wrap" id="servicos">
+  <div class="block-head reveal">
+    <h2>Serviços</h2>
+    <p>Formatos de atendimento disponíveis.</p>
+  </div>
+  <div class="serv-grid">
+    <div class="serv-card reveal">
+      <h3>Chef à domicílio</h3>
+      <p>Jantar completo preparado na sua casa, do preparo ao serviço à mesa, para até [X] convidados.</p>
+      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Consultar disponibilidade →</a>
+    </div>
+    <div class="serv-card reveal">
+      <h3>Eventos e celebrações</h3>
+      <p>Menus para aniversários, casamentos e confraternizações corporativas.</p>
+      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar sobre o evento →</a>
+    </div>
+    <div class="serv-card reveal">
+      <h3>Aulas particulares</h3>
+      <p>Aulas individuais ou em grupo, presenciais, com foco em técnicas específicas.</p>
+      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Consultar disponibilidade →</a>
+    </div>
+    <div class="serv-card reveal">
+      <h3>Consultoria de menu</h3>
+      <p>Desenvolvimento e revisão de cardápio para restaurantes e negócios do setor.</p>
+      <a class="preco" href="https://wa.me/5517997310535" target="_blank" rel="noopener">Falar com o chef →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MENU DEGUSTAÇÃO ===== -->
+<section class="block wrap">
+  <div class="block-head reveal">
+    <h2>Menu degustação</h2>
+    <p>Exemplo de sequência. O cardápio é sempre adaptado à ocasião.</p>
+  </div>
+  <div class="menu-list reveal">
+    <div class="menu-row">
+      <div><h4>Entrada</h4><p>Tomates heirloom, burrata e manjericão da horta</p></div>
+    </div>
+    <div class="menu-row">
+      <div><h4>Prato principal</h4><p>Peixe grelhado, purê de mandioquinha, legumes da estação</p></div>
+    </div>
+    <div class="menu-row">
+      <div><h4>Sobremesa</h4><p>Chocolate 70%, frutas vermelhas, farofa crocante</p></div>
+    </div>
+  </div>
+  <p class="menu-note">Menu completo com [X] tempos disponível mediante consulta. Restrições alimentares atendidas com aviso prévio.</p>
+  <a class="btn-outline menu-cta" href="https://wa.me/5517997310535" target="_blank" rel="noopener" style="display:inline-block;">Consultar cardápio completo</a>
+</section>
+
+<!-- ===== AVALIAÇÕES ===== -->
+<section class="block wrap" id="depoimentos">
+  <div class="block-head reveal">
+    <h2>O que dizem os clientes</h2>
+    <p>Avaliações reais do perfil no Google.</p>
+  </div>
+  <div class="aval-grid">
+    <div class="aval-card reveal">
+      <div class="stars">★★★★★</div>
+      <p>"Experiência incrível, cada prato contava uma história. Recomendo demais para quem quer sair do óbvio."</p>
+      <div class="autor">Nome do cliente</div>
+    </div>
+    <div class="aval-card reveal">
+      <div class="stars">★★★★★</div>
+      <p>"Atendimento impecável do início ao fim, o cardápio foi todo pensado pro nosso evento."</p>
+      <div class="autor">Nome do cliente</div>
+    </div>
+    <div class="aval-card reveal">
+      <div class="stars">★★★★★</div>
+      <p>"Sabor, apresentação e simpatia. Já virou tradição contratar para datas especiais."</p>
+      <div class="autor">Nome do cliente</div>
+    </div>
+  </div>
+  <a class="ver-google" href="#" target="_blank" rel="noopener">Ver todas as avaliações no Google →</a>
+</section>
+
+<!-- ===== ONDE ATENDE ===== -->
+<section class="block wrap onde">
+  <div class="reveal">
+    <div class="ph"><span>[MAPA ou FOTO: ambiente / mesa posta]</span></div>
+  </div>
+  <div class="reveal">
+    <h2 style="margin-bottom:18px;">Onde atende</h2>
+    <ul class="onde-list">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>São José do Rio Preto</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Demais cidades e estados (consultar deslocamento)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== INSTAGRAM ===== -->
+<section class="insta-band">
+  <div class="wrap reveal">
+    <h2>Acompanhe no Instagram</h2>
+    <p>@chef_pitty</p>
+    <div class="insta-grid">
+      <div class="ph"><span>[post 1]</span></div>
+      <div class="ph"><span>[post 2]</span></div>
+      <div class="ph"><span>[post 3]</span></div>
+      <div class="ph"><span>[post 4]</span></div>
+    </div>
+    <a class="insta-link" href="https://instagram.com/chef_pitty" target="_blank" rel="noopener">Ver perfil completo →</a>
+  </div>
+</section>
+
+<!-- ===== CONTATO ===== -->
+<section class="block wrap contato" id="contato">
+  <div class="contato-info reveal">
+    <h2>Vamos planejar seu evento</h2>
+    <p>Conte um pouco sobre a ocasião e retornamos com uma proposta de cardápio.</p>
+    <div class="contato-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5a2 2 0 0 1 2-2h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 12l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg>
+      +55 17 99731-0535
+    </div>
+    <div class="contato-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      contato@chefpitty.com.br
+    </div>
+    <div class="contato-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.2"/><circle cx="16.6" cy="7.4" r="0.6" fill="currentColor"/></svg>
+      @chef_pitty
+    </div>
+  </div>
+  <form class="contato-form reveal" action="mailto:contato@chefpitty.com.br" method="post" enctype="text/plain">
+    <input type="text" placeholder="Nome" required>
+    <input type="tel" placeholder="WhatsApp" required>
+    <input type="text" placeholder="Tipo de evento / data">
+    <textarea placeholder="Conte mais sobre a ocasião"></textarea>
+    <button type="submit">Enviar mensagem</button>
+  </form>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo-icon.png" alt="Símbolo Chef Pitty">
+      <p>© 2026 Chef Pitty. Todos os direitos reservados.</p>
+    </div>
+    <div class="foot-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#contato">Contato</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll — elementos começam visíveis (só deslocados), nunca escondidos
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Carrossel com scroll-snap nativo
+  const track = document.getElementById('carouselTrack');
+  const prevBtn = document.getElementById('carPrev');
+  const nextBtn = document.getElementById('carNext');
+  function slideWidth() {
+    const slide = track.querySelector('.carousel-slide');
+    return slide ? slide.getBoundingClientRect().width + 20 : track.clientWidth;
+  }
+  nextBtn.addEventListener('click', () => track.scrollBy({ left: slideWidth(), behavior: 'smooth' }));
+  prevBtn.addEventListener('click', () => track.scrollBy({ left: -slideWidth(), behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
