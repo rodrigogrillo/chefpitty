@@ -217,37 +217,114 @@
   .esp-card p { color: var(--ink-muted); font-size: 0.92rem; }
   @media (max-width: 860px) { .esp-grid { grid-template-columns: 1fr; } }
 
-  /* ---------- galeria / carousel ---------- */
-  .carousel-wrap { position: relative; }
-  .carousel-track {
+  /* ---------- galeria / grid + lightbox ---------- */
+  .gal-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .gal-item {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--card);
+    padding: 0;
+    cursor: zoom-in;
+  }
+  .gal-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease;
+  }
+  .gal-item:hover img { transform: scale(1.06); }
+  .gal-item::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.25));
+    pointer-events: none;
+  }
+  .gal-more {
+    grid-column: 1 / -1;
     display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    gap: 20px;
-    padding-bottom: 8px;
-    scrollbar-width: none;
+    justify-content: center;
+    margin-top: 6px;
   }
-  .carousel-track::-webkit-scrollbar { display: none; }
-  .carousel-slide {
-    flex: 0 0 100%;
-    scroll-snap-align: start;
-  }
-  @media (min-width: 720px) {
-    .carousel-slide { flex: 0 0 calc(33.333% - 14px); }
-  }
-  .carousel-slide .ph { aspect-ratio: 4/3; border-radius: 4px; }
-  .carousel-slide .cap { margin-top: 10px; font-size: 0.88rem; color: var(--ink-muted); }
-  .carousel-nav { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
-  .carousel-nav button {
-    width: 40px; height: 40px;
-    border-radius: 50%;
+  .gal-more button {
     border: 1px solid var(--line);
     background: transparent;
     color: var(--ink);
+    padding: 12px 26px;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 1.1rem;
   }
-  .carousel-nav button:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+  .gal-more button:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+  .gal-item.is-hidden { display: none; }
+
+  @media (max-width: 860px) {
+    .gal-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  }
+  @media (max-width: 560px) {
+    .gal-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(12,9,7,0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .lightbox.is-open { opacity: 1; pointer-events: auto; }
+  .lightbox img {
+    max-width: min(920px, 92vw);
+    max-height: 86vh;
+    width: auto; height: auto;
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox-close, .lightbox-prev, .lightbox-next {
+    position: absolute;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(243,235,221,0.25);
+    background: rgba(23,18,14,0.6);
+    color: var(--ink);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+  .lightbox-close { top: 20px; right: 20px; }
+  .lightbox-prev { left: 20px; top: 50%; transform: translateY(-50%); }
+  .lightbox-next { right: 20px; top: 50%; transform: translateY(-50%); }
+  .lightbox-count {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+  }
+  @media (max-width: 700px) {
+    .lightbox-prev, .lightbox-next { width: 40px; height: 40px; }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
+    .lightbox-close { top: 10px; right: 10px; }
+  }
 
   /* ---------- serviços ---------- */
   .serv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -467,41 +544,87 @@
   </div>
 </section>
 
-<!-- ===== GALERIA / CARROSSEL ===== -->
+<!-- ===== GALERIA / MOMENTOS ===== -->
 <section class="block wrap" id="galeria">
   <div class="block-head reveal">
-    <h2>Galeria de pratos</h2>
-    <p>Uma seleção de criações recentes.</p>
+    <h2>Galeria de momentos</h2>
+    <p>Eventos, celebrações e mesas servidas pelo Chef Pitty.</p>
   </div>
-  <div class="carousel-wrap reveal">
-    <div class="carousel-track" id="carouselTrack">
-      <div class="carousel-slide">
-        <div class="ph"><span>[FOTO: prato 1]</span></div>
-        <p class="cap">Risoto de cogumelos selvagens com azeite trufado</p>
-      </div>
-      <div class="carousel-slide">
-        <div class="ph"><span>[FOTO: prato 2]</span></div>
-        <p class="cap">Cordeiro ao molho de ervas com purê de mandioquinha</p>
-      </div>
-      <div class="carousel-slide">
-        <div class="ph"><span>[FOTO: prato 3]</span></div>
-        <p class="cap">Sobremesa de chocolate 70% com frutas vermelhas</p>
-      </div>
-      <div class="carousel-slide">
-        <div class="ph"><span>[FOTO: prato 4]</span></div>
-        <p class="cap">Peixe branco grelhado com legumes da estação</p>
-      </div>
-      <div class="carousel-slide">
-        <div class="ph"><span>[FOTO: prato 5]</span></div>
-        <p class="cap">Entrada fria de tomates heirloom e burrata</p>
-      </div>
-    </div>
-    <div class="carousel-nav">
-      <button aria-label="Anterior" id="carPrev">←</button>
-      <button aria-label="Próximo" id="carNext">→</button>
+  <div class="gal-grid" id="galGrid">
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-01.jpg" data-index="0" aria-label="Ampliar foto 01">
+        <img src="assets/galeria/galeria-01.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-02.jpg" data-index="1" aria-label="Ampliar foto 02">
+        <img src="assets/galeria/galeria-02.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-03.jpg" data-index="2" aria-label="Ampliar foto 03">
+        <img src="assets/galeria/galeria-03.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-04.jpg" data-index="3" aria-label="Ampliar foto 04">
+        <img src="assets/galeria/galeria-04.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-05.jpg" data-index="4" aria-label="Ampliar foto 05">
+        <img src="assets/galeria/galeria-05.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-06.jpg" data-index="5" aria-label="Ampliar foto 06">
+        <img src="assets/galeria/galeria-06.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-07.jpg" data-index="6" aria-label="Ampliar foto 07">
+        <img src="assets/galeria/galeria-07.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal" data-full="assets/galeria/full/galeria-08.jpg" data-index="7" aria-label="Ampliar foto 08">
+        <img src="assets/galeria/galeria-08.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-09.jpg" data-index="8" aria-label="Ampliar foto 09">
+        <img src="assets/galeria/galeria-09.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-10.jpg" data-index="9" aria-label="Ampliar foto 10">
+        <img src="assets/galeria/galeria-10.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-11.jpg" data-index="10" aria-label="Ampliar foto 11">
+        <img src="assets/galeria/galeria-11.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-12.jpg" data-index="11" aria-label="Ampliar foto 12">
+        <img src="assets/galeria/galeria-12.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-13.jpg" data-index="12" aria-label="Ampliar foto 13">
+        <img src="assets/galeria/galeria-13.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-14.jpg" data-index="13" aria-label="Ampliar foto 14">
+        <img src="assets/galeria/galeria-14.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-15.jpg" data-index="14" aria-label="Ampliar foto 15">
+        <img src="assets/galeria/galeria-15.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-16.jpg" data-index="15" aria-label="Ampliar foto 16">
+        <img src="assets/galeria/galeria-16.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-17.jpg" data-index="16" aria-label="Ampliar foto 17">
+        <img src="assets/galeria/galeria-17.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-18.jpg" data-index="17" aria-label="Ampliar foto 18">
+        <img src="assets/galeria/galeria-18.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-19.jpg" data-index="18" aria-label="Ampliar foto 19">
+        <img src="assets/galeria/galeria-19.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+      <button class="gal-item reveal is-hidden" data-full="assets/galeria/full/galeria-20.jpg" data-index="19" aria-label="Ampliar foto 20">
+        <img src="assets/galeria/galeria-20.jpg" alt="Momento de evento atendido pelo Chef Pitty" loading="lazy">
+      </button>
+    <div class="gal-more">
+      <button id="galMoreBtn" type="button">Ver mais fotos</button>
     </div>
   </div>
 </section>
+
+<!-- ===== LIGHTBOX ===== -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Visualização ampliada da foto">
+  <button class="lightbox-close" id="lbClose" aria-label="Fechar">✕</button>
+  <button class="lightbox-prev" id="lbPrev" aria-label="Foto anterior">←</button>
+  <img id="lbImg" src="" alt="Foto ampliada">
+  <button class="lightbox-next" id="lbNext" aria-label="Próxima foto">→</button>
+  <div class="lightbox-count" id="lbCount"></div>
+</div>
 
 <!-- ===== SERVIÇOS ===== -->
 <section class="block wrap" id="servicos">
@@ -657,16 +780,60 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // Carrossel com scroll-snap nativo
-  const track = document.getElementById('carouselTrack');
-  const prevBtn = document.getElementById('carPrev');
-  const nextBtn = document.getElementById('carNext');
-  function slideWidth() {
-    const slide = track.querySelector('.carousel-slide');
-    return slide ? slide.getBoundingClientRect().width + 20 : track.clientWidth;
+  // Galeria de momentos — grid + "ver mais" + lightbox
+  const galGrid = document.getElementById('galGrid');
+  const galItems = Array.from(document.querySelectorAll('.gal-item'));
+  const galMoreBtn = document.getElementById('galMoreBtn');
+
+  if (galMoreBtn) {
+    galMoreBtn.addEventListener('click', () => {
+      galItems.forEach(item => {
+        item.classList.remove('is-hidden');
+        item.classList.add('is-visible'); // já visível ao expandir, sem depender do scroll
+      });
+      galMoreBtn.parentElement.style.display = 'none';
+    });
   }
-  nextBtn.addEventListener('click', () => track.scrollBy({ left: slideWidth(), behavior: 'smooth' }));
-  prevBtn.addEventListener('click', () => track.scrollBy({ left: -slideWidth(), behavior: 'smooth' }));
+
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCount = document.getElementById('lbCount');
+  const lbClose = document.getElementById('lbClose');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
+  let currentIndex = 0;
+
+  function openLightbox(index) {
+    currentIndex = index;
+    const item = galItems[currentIndex];
+    lbImg.src = item.dataset.full;
+    lbImg.alt = item.querySelector('img').alt;
+    lbCount.textContent = (currentIndex + 1) + ' / ' + galItems.length;
+    lightbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  function showDelta(delta) {
+    currentIndex = (currentIndex + delta + galItems.length) % galItems.length;
+    openLightbox(currentIndex);
+  }
+
+  galItems.forEach((item, i) => {
+    item.addEventListener('click', () => openLightbox(i));
+  });
+  lbClose.addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', () => showDelta(-1));
+  lbNext.addEventListener('click', () => showDelta(1));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('is-open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') showDelta(1);
+    if (e.key === 'ArrowLeft') showDelta(-1);
+  });
 </script>
 
 </body>
