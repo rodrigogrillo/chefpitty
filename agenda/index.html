@@ -62,6 +62,7 @@
   .date .d{font-family:var(--serif);font-size:2rem;line-height:1}
   .date .w{font-size:.7rem;color:var(--gold-soft);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600}
   .ev .name{font-weight:600;font-size:1.05rem;line-height:1.25}
+  .ev .full{font-size:.92rem;font-weight:600;color:var(--gold-soft);margin-top:2px;letter-spacing:.01em}
   .ev .meta{color:var(--ink-muted);font-size:.86rem;margin-top:4px}
   .ev .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
   .badge{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:5px 11px;border-radius:30px}
@@ -249,6 +250,7 @@
         html+='<button class="ev'+(past?' past':'')+'" data-id="'+e.id+'">'+
           '<div class="date"><span class="d">'+pad(d.getDate())+'</span><span class="w">'+WD[d.getDay()]+'</span></div>'+
           '<div><div class="name">'+esc(e.name)+'</div>'+
+          '<div class="full">'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+'</div>'+
           (meta.length?'<div class="meta">'+meta.join(" · ")+'</div>':'')+
           '<div class="row"><span class="badge '+(e.paid?'ok':'pend')+'">'+(e.paid?'Entrada paga':'Falta entrada')+'</span>'+
           (e.val?'<span class="val">Reserva '+brl(e.val)+'</span>':'')+'</div></div></button>';
