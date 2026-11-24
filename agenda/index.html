@@ -78,6 +78,9 @@
   .fab svg{width:24px;height:24px}
   .fab:hover{background:var(--gold-soft)}
 
+  .exp{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:34px;height:54px;border:1px solid rgba(198,142,57,.5);border-radius:14px;color:var(--gold-soft);font-weight:600;font-size:.98rem}
+  .exp:hover{background:rgba(198,142,57,.1)}
+  .exp svg{width:20px;height:20px}
   .foot{margin-top:44px;text-align:center;font-size:.8rem;color:var(--ink-faint)}
   .foot button{color:var(--ink-muted);text-decoration:underline;text-underline-offset:3px;padding:10px 8px}
 
@@ -142,6 +145,11 @@
   </div>
 
   <div id="app"></div>
+
+  <button class="exp" id="export" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+    Exportar agenda (planilha)
+  </button>
 
   <div class="foot">
     <button id="reset">Restaurar exemplos</button> · <button id="clear">Limpar tudo</button>
@@ -332,6 +340,28 @@
     events=events.filter(function(x){ return x.id!==editingId; });
     delete $("fDel").dataset.sure; $("fDel").textContent="Apagar";
     save(); closeSheet(); render(); toast("Evento apagado");
+  });
+
+  function csvCell(v){
+    var t=String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(t)) t="'"+t;
+    return '"'+t.replace(/"/g,'""')+'"';
+  }
+  $("export").addEventListener("click", function(){
+    if(!events.length){ toast("Não há eventos para exportar"); return; }
+    var rows=[["Data","Nome","Convidados","Local","Valor da reserva (R$)","Entrada paga"]];
+    events.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; }).forEach(function(e){
+      var d=parse(e.date);
+      rows.push([pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(), e.name, e.guests||"", e.local||"", e.val?e.val.toFixed(2).replace(".",","):"", e.paid?"Sim":"Não"]);
+    });
+    var csv="\uFEFF"+rows.map(function(r){ return r.map(csvCell).join(";"); }).join("\r\n");
+    var blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+    var url=URL.createObjectURL(blob), a=document.createElement("a");
+    var n=new Date();
+    a.href=url; a.download="agenda-chef-pitty-"+iso(n)+".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+    toast("Agenda exportada");
   });
 
   $("reset").addEventListener("click", function(){ events=samples(); save(); filter="todos"; document.querySelectorAll(".chip").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-f")==="todos"?"true":"false"); }); render(); toast("Exemplos restaurados"); });
