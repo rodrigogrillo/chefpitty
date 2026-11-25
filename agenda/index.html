@@ -120,22 +120,55 @@
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#1a120a;padding:12px 20px;border-radius:30px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;z-index:60;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%)}
   @media(max-width:360px){.stats{gap:6px}.stat{padding:12px 8px}}
+  body.is-auth #appView{display:none}
+  body:not(.is-auth) #loginView{display:none}
+  body.is-auth{padding-bottom:0}
+  .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 18px}
+  .login-card{width:100%;max-width:400px;background:var(--bg-alt);border:1px solid var(--line);border-radius:24px;padding:30px 22px 26px}
+  .login-logo{width:58px;height:58px;border-radius:14px;margin:0 auto 14px}
+  .login-card h1{font-family:var(--serif);font-weight:400;font-size:2.2rem;text-align:center;line-height:1.1}
+  .login-sub{text-align:center;color:var(--ink-muted);font-size:.92rem;margin-top:6px;margin-bottom:6px}
+  .login-btn{width:100%;margin-top:20px;flex:none}
+  .pw{position:relative}
+  .pw .in{padding-right:84px}
+  .pwtoggle{position:absolute;right:6px;top:6px;height:40px;padding:0 12px;color:var(--gold-soft);font-size:.85rem;font-weight:600}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .back{background:none;border:1px solid var(--line);border-radius:30px;padding:8px 16px;min-height:40px;color:var(--ink-muted)}
+  .loading{margin-top:40px;text-align:center;color:var(--ink-muted);padding:30px 10px}
+  .loading .retry{margin-top:14px;border:1px solid var(--line);border-radius:30px;padding:10px 20px;color:var(--gold-soft);font-weight:600}
+  [hidden]{display:none !important}
+  .login-logo{display:block}
 </style>
 </head>
-<body>
+<body class="is-auth">
 
+<!-- LOGIN -->
+<section class="login" id="loginView">
+  <form class="login-card" id="loginForm" novalidate>
+    <img src="../assets/logo-icon.png" alt="Chef Pitty" class="login-logo">
+    <h1>Agenda</h1>
+    <p class="login-sub">Entre para ver os seus eventos.</p>
+    <label class="f"><span>E-mail</span>
+      <input class="in" id="lEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+    <label class="f"><span>Senha</span>
+      <div class="pw"><input class="in" id="lPass" type="password" autocomplete="current-password"><button type="button" id="lShow" class="pwtoggle" aria-label="Mostrar senha">Mostrar</button></div></label>
+    <div class="dup show" id="lErr" hidden></div>
+    <button type="submit" class="btn main login-btn" id="lBtn">Entrar</button>
+  </form>
+</section>
+
+<!-- APP -->
+<div id="appView">
 <header class="top">
   <div class="wrap top-in">
     <img src="../assets/logo-icon.png" alt="Chef Pitty">
     <h1>Agenda</h1>
     <span class="sp"></span>
-    <a class="back" href="../index.html">Ir para o site</a>
+    <button class="back" id="logout" type="button">Sair</button>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="proto"><b>Protótipo para testar.</b> Os eventos abaixo são exemplos. Pode adicionar, editar e apagar à vontade: o que você cadastrar fica salvo só neste aparelho.</div>
-
   <div class="stats" id="stats"></div>
 
   <div class="chips" role="group" aria-label="Filtrar eventos">
@@ -150,10 +183,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
     Exportar agenda (planilha)
   </button>
-
-  <div class="foot">
-    <button id="reset">Restaurar exemplos</button> · <button id="clear">Limpar tudo</button>
-  </div>
 </main>
 
 <button class="fab" id="add" aria-label="Novo evento">
@@ -186,18 +215,21 @@
     <div class="actions">
       <button type="button" class="btn del" id="fDel" hidden>Apagar</button>
       <button type="button" class="btn ghost" id="fCancel">Cancelar</button>
-      <button type="submit" class="btn main">Salvar</button>
+      <button type="submit" class="btn main" id="fSave">Salvar</button>
     </div>
   </form>
+</div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
-  var KEY = "chefpitty_agenda_proto_v1";
+  var SUPA_URL = "https://acywsbczunkwglwzlumb.supabase.co";
+  var SUPA_KEY = "sb_publishable_XsaoLtIVddEpAd-0vp196g_auu5uqt2";
+  var SKEY = "chefpitty_agenda_session_v1";
   var MONTHS = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
   var WD = ["dom","seg","ter","qua","qui","sex","sáb"];
-  var filter = "todos", editingId = null, dupOk = false;
+  var filter = "todos", editingId = null, dupOk = false, events = [], session = null, saving = false;
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
@@ -205,36 +237,96 @@
   function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function parse(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
   function brl(n){ return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
-  function uid(){ return "e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("show");},2400); }
 
-  function samples(){
-    var t = new Date(); t.setHours(0,0,0,0);
-    function plus(days){ var d=new Date(t); d.setDate(d.getDate()+days); return iso(d); }
-    return [
-      {id:uid(),name:"Beatriz e Henrique",date:plus(-12),guests:120,local:"Espaço Bella Vista, Rio Preto",val:2500,paid:true},
-      {id:uid(),name:"Camila e Rodrigo",date:plus(18),guests:80,local:"Chácara Santa Clara, Mirassol",val:1800,paid:true},
-      {id:uid(),name:"Juliana Prado",date:plus(34),guests:60,local:"Casa da cliente, Bady Bassitt",val:1200,paid:false},
-      {id:uid(),name:"Fernanda e Lucas",date:plus(47),guests:150,local:"Villa Jardim, Rio Preto",val:3000,paid:false},
-      {id:uid(),name:"Aline e Thiago",date:plus(75),guests:100,local:"Fazenda Boa Esperança, Cedral",val:2200,paid:true},
-      {id:uid(),name:"Empresa Alfa (confraternização)",date:plus(96),guests:70,local:"Salão do clube, Rio Preto",val:1500,paid:false}
-    ];
+  /* ---------- sessão ---------- */
+  function loadSession(){ try{ var r=localStorage.getItem(SKEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+  function storeSession(s){ try{ if(s) localStorage.setItem(SKEY, JSON.stringify(s)); else localStorage.removeItem(SKEY); }catch(e){} }
+  function setSession(d){
+    session = d ? { access_token:d.access_token, refresh_token:d.refresh_token, expires_at: d.expires_at || (Math.floor(Date.now()/1000)+(d.expires_in||3600)) } : null;
+    storeSession(session);
   }
-  function load(){
-    try{ var raw=localStorage.getItem(KEY); if(raw){ var a=JSON.parse(raw); if(Array.isArray(a)) return a; } }catch(e){}
-    return samples();
+  function netError(){ var e=new Error("Sem conexão. Confira a internet e tente de novo."); e.net=true; return e; }
+
+  function authFetch(path, body){
+    return fetch(SUPA_URL+path, { method:"POST", headers:{ "apikey":SUPA_KEY, "Content-Type":"application/json" }, body:JSON.stringify(body) })
+      .catch(function(){ throw netError(); });
   }
-  var events = load();
-  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(events)); }catch(e){} }
-  save();
+  function refresh(){
+    if(!session || !session.refresh_token) return Promise.reject(new Error("sem sessão"));
+    return authFetch("/auth/v1/token?grant_type=refresh_token", { refresh_token: session.refresh_token }).then(function(r){
+      if(!r.ok){ setSession(null); throw new Error("sessão expirada"); }
+      return r.json().then(setSession);
+    });
+  }
+  function ensureFresh(){
+    if(!session) return Promise.reject(new Error("sem sessão"));
+    if(session.expires_at - Math.floor(Date.now()/1000) < 60) return refresh();
+    return Promise.resolve();
+  }
+  function api(method, path, body, retried){
+    return ensureFresh().then(function(){
+      var h = { "apikey":SUPA_KEY, "Authorization":"Bearer "+session.access_token, "Content-Type":"application/json" };
+      if(method==="POST"||method==="PATCH") h["Prefer"]="return=representation";
+      return fetch(SUPA_URL+"/rest/v1/"+path, { method:method, headers:h, body: body?JSON.stringify(body):undefined }).catch(function(){ throw netError(); });
+    }).then(function(r){
+      if(r.status===401 && !retried){ return refresh().then(function(){ return api(method,path,body,true); }); }
+      if(!r.ok){ return r.text().then(function(t){ var e=new Error("Não foi possível concluir (erro "+r.status+")."); e.status=r.status; throw e; }); }
+      return r.status===204 ? null : r.json();
+    });
+  }
 
-  function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("show");},2200); }
+  /* ---------- mapeamento ---------- */
+  function fromDb(r){ return { id:r.id, name:r.nome, date:r.data, guests:r.convidados||0, local:r.local||"", val:Number(r.valor)||0, paid:!!r.entrada_paga }; }
+  function toDb(e){ return { nome:e.name, data:e.date, convidados:e.guests||null, local:e.local||null, valor:e.val||null, entrada_paga:!!e.paid }; }
 
+  /* ---------- telas ---------- */
+  function showLogin(msg){
+    document.body.classList.add("is-auth"); closeSheet();
+    var er=$("lErr"); if(msg){ er.textContent=msg; er.hidden=false; } else { er.hidden=true; }
+    $("lBtn").disabled=false; $("lBtn").textContent="Entrar";
+  }
+  function showApp(){ document.body.classList.remove("is-auth"); }
+
+  function loadEvents(){
+    $("app").innerHTML='<div class="loading">Carregando a agenda...</div>';
+    return api("GET","eventos?select=*&order=data.asc").then(function(rows){
+      events = rows.map(fromDb); render();
+    }).catch(function(e){
+      if(!session){ showLogin("Sua sessão expirou. Entre de novo."); return; }
+      $("app").innerHTML='<div class="loading">'+esc(e.message||"Erro ao carregar.")+'<br><button class="retry" id="retry" type="button">Tentar de novo</button></div>';
+      $("retry").addEventListener("click", loadEvents);
+    });
+  }
+
+  /* ---------- login ---------- */
+  $("lShow").addEventListener("click", function(){
+    var p=$("lPass"), s=p.type==="password"; p.type=s?"text":"password"; this.textContent=s?"Ocultar":"Mostrar";
+  });
+  $("loginForm").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var email=$("lEmail").value.trim(), pass=$("lPass").value;
+    if(!email||!pass){ $("lErr").textContent="Preencha o e-mail e a senha."; $("lErr").hidden=false; return; }
+    $("lBtn").disabled=true; $("lBtn").textContent="Entrando...";
+    authFetch("/auth/v1/token?grant_type=password",{ email:email, password:pass }).then(function(r){
+      if(!r.ok){ throw new Error(r.status===400||r.status===401 ? "E-mail ou senha incorretos." : "Não foi possível entrar agora. Tente de novo."); }
+      return r.json();
+    }).then(function(d){
+      setSession(d); $("lPass").value=""; showApp(); loadEvents();
+    }).catch(function(e){ showLogin(e.message); });
+  });
+  $("logout").addEventListener("click", function(){
+    var tk = session && session.access_token;
+    if(tk){ fetch(SUPA_URL+"/auth/v1/logout",{ method:"POST", headers:{ "apikey":SUPA_KEY, "Authorization":"Bearer "+tk } }).catch(function(){}); }
+    setSession(null); events=[]; $("lEmail").value=""; showLogin();
+  });
+
+  /* ---------- lista ---------- */
   function render(){
     var today=new Date(); today.setHours(0,0,0,0);
     var sorted = events.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
     var upcoming = sorted.filter(function(e){ return parse(e.date)>=today; });
     var pend = upcoming.filter(function(e){ return !e.paid; });
-    var sumPend = pend.reduce(function(s,e){return s+(e.val||0);},0);
     $("stats").innerHTML =
       '<div class="stat"><div class="n">'+upcoming.length+'</div><div class="l">próximos eventos</div></div>'+
       '<div class="stat warn"><div class="n">'+pend.length+'</div><div class="l">falta entrada</div></div>'+
@@ -243,7 +335,7 @@
     var list = sorted.filter(function(e){ return filter==="todos" || (filter==="pend" && !e.paid) || (filter==="pago" && e.paid); });
     var app=$("app");
     if(!list.length){
-      app.innerHTML='<div class="empty"><b>Nenhum evento por aqui</b>Toque em "Novo evento" para cadastrar.</div>';
+      app.innerHTML='<div class="empty"><b>'+(events.length?'Nenhum evento neste filtro':'Sua agenda está vazia')+'</b>'+(events.length?'Toque em "Todos" para ver tudo.':'Toque em "Novo evento" para cadastrar o primeiro.')+'</div>';
       return;
     }
     var groups={}, order=[];
@@ -255,7 +347,7 @@
       items.forEach(function(e){
         var d=parse(e.date), past=d<today;
         var meta=[]; if(e.guests) meta.push(e.guests+" convidados"); if(e.local) meta.push(esc(e.local));
-        html+='<button class="ev'+(past?' past':'')+'" data-id="'+e.id+'">'+
+        html+='<button class="ev'+(past?' past':'')+'" data-id="'+esc(e.id)+'">'+
           '<div class="date"><span class="d">'+pad(d.getDate())+'</span><span class="w">'+WD[d.getDay()]+'</span></div>'+
           '<div><div class="name">'+esc(e.name)+'</div>'+
           '<div class="full">'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+'</div>'+
@@ -268,7 +360,7 @@
     app.innerHTML=html;
   }
 
-  /* ---------- form ---------- */
+  /* ---------- formulário ---------- */
   function setPaid(v){ $("fPaid").setAttribute("aria-pressed", v?"true":"false"); $("fPaidS").textContent = v?"Entrada recebida":"Ainda falta a entrada"; }
   function isPaid(){ return $("fPaid").getAttribute("aria-pressed")==="true"; }
   function fmtMoneyInput(el){
@@ -277,10 +369,12 @@
     el.value=(parseInt(digits,10)/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
   }
   function parseMoney(s){ var d=s.replace(/\D/g,""); return d?parseInt(d,10)/100:0; }
+  function formMsg(t){ var d=$("dup"); if(t){ d.textContent=t; d.classList.add("show"); } else d.classList.remove("show"); }
+  function setBusy(b){ saving=b; $("fSave").disabled=b; $("fDel").disabled=b; $("fSave").textContent=b?"Salvando...":"Salvar"; }
 
   function openSheet(id){
-    editingId=id||null; dupOk=false;
-    $("dup").classList.remove("show"); $("eName").classList.remove("show"); $("eDate").classList.remove("show");
+    editingId=id||null; dupOk=false; setBusy(false); formMsg("");
+    $("eName").classList.remove("show"); $("eDate").classList.remove("show");
     var e = id ? events.filter(function(x){return x.id===id;})[0] : null;
     $("ftitle").textContent = e ? "Editar evento" : "Novo evento";
     $("fName").value = e?e.name:"";
@@ -289,7 +383,7 @@
     $("fLocal").value = e?e.local:"";
     $("fVal").value = e&&e.val ? e.val.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
     setPaid(e?e.paid:false);
-    $("fDel").hidden = !e;
+    $("fDel").hidden = !e; $("fDel").textContent="Apagar"; delete $("fDel").dataset.sure;
     $("ov").classList.add("open"); $("ov").setAttribute("aria-hidden","false");
     document.body.style.overflow="hidden";
     if(!e) setTimeout(function(){ $("fName").focus(); }, 80);
@@ -297,16 +391,14 @@
   function closeSheet(){ $("ov").classList.remove("open"); $("ov").setAttribute("aria-hidden","true"); document.body.style.overflow=""; }
 
   $("add").addEventListener("click", function(){ openSheet(); });
-  $("fCancel").addEventListener("click", closeSheet);
-  $("ov").addEventListener("click", function(e){ if(e.target===$("ov")) closeSheet(); });
-  document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeSheet(); });
+  $("fCancel").addEventListener("click", function(){ if(!saving) closeSheet(); });
+  $("ov").addEventListener("click", function(e){ if(e.target===$("ov") && !saving) closeSheet(); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && !saving) closeSheet(); });
   $("fPaid").addEventListener("click", function(){ setPaid(!isPaid()); });
   $("fVal").addEventListener("input", function(){ fmtMoneyInput(this); });
-  $("fDate").addEventListener("change", function(){ dupOk=false; $("dup").classList.remove("show"); });
+  $("fDate").addEventListener("change", function(){ dupOk=false; formMsg(""); });
 
-  $("app").addEventListener("click", function(e){
-    var b=e.target.closest(".ev"); if(b) openSheet(b.getAttribute("data-id"));
-  });
+  $("app").addEventListener("click", function(e){ var b=e.target.closest(".ev"); if(b) openSheet(b.getAttribute("data-id")); });
   document.querySelector(".chips").addEventListener("click", function(e){
     var c=e.target.closest(".chip"); if(!c) return;
     filter=c.getAttribute("data-f");
@@ -314,34 +406,45 @@
     render();
   });
 
+  function failMsg(e){
+    if(e && e.net) return e.message;
+    if(!session) { closeSheet(); showLogin("Sua sessão expirou. Entre de novo."); return null; }
+    return (e && e.message) || "Não foi possível salvar. Tente de novo.";
+  }
+
   $("form").addEventListener("submit", function(ev){
-    ev.preventDefault();
-    var name=$("fName").value.trim(), date=$("fDate").value, ok=true;
+    ev.preventDefault(); if(saving) return;
+    var name=$("fName").value.trim(), date=$("fDate").value;
     $("eName").classList.toggle("show", !name); $("eDate").classList.toggle("show", !date);
     if(!name||!date) return;
     var clash = events.filter(function(x){ return x.date===date && x.id!==editingId; });
     if(clash.length && !dupOk){
-      $("dup").innerHTML="Atenção: já existe evento nesta data ("+esc(clash[0].name)+"). Toque em Salvar de novo se quiser manter os dois.";
-      $("dup").classList.add("show"); dupOk=true; return;
+      formMsg("Atenção: já existe evento nesta data ("+clash[0].name+"). Toque em Salvar de novo se quiser manter os dois.");
+      dupOk=true; return;
     }
     var data={ name:name, date:date, guests:parseInt($("fGuests").value,10)||0, local:$("fLocal").value.trim(), val:parseMoney($("fVal").value), paid:isPaid() };
-    if(editingId){
-      events=events.map(function(x){ return x.id===editingId ? Object.assign({id:x.id},data) : x; });
-      toast("Evento atualizado");
-    } else {
-      data.id=uid(); events.push(data); toast("Evento salvo");
-    }
-    save(); closeSheet(); render();
+    setBusy(true); formMsg("");
+    var req = editingId ? api("PATCH","eventos?id=eq."+encodeURIComponent(editingId), toDb(data)) : api("POST","eventos", toDb(data));
+    req.then(function(rows){
+      var saved = rows && rows[0] ? fromDb(rows[0]) : null;
+      if(!saved) throw new Error("Não foi possível salvar. Tente de novo.");
+      if(editingId) events = events.map(function(x){ return x.id===editingId ? saved : x; }); else events.push(saved);
+      setBusy(false); closeSheet(); render(); toast(editingId?"Evento atualizado":"Evento salvo");
+    }).catch(function(e){ setBusy(false); var m=failMsg(e); if(m) formMsg(m); });
   });
 
   $("fDel").addEventListener("click", function(){
-    if(!editingId) return;
-    if(!$("fDel").dataset.sure){ $("fDel").dataset.sure="1"; $("fDel").textContent="Confirmar"; setTimeout(function(){ $("fDel").textContent="Apagar"; delete $("fDel").dataset.sure; },3000); return; }
-    events=events.filter(function(x){ return x.id!==editingId; });
-    delete $("fDel").dataset.sure; $("fDel").textContent="Apagar";
-    save(); closeSheet(); render(); toast("Evento apagado");
+    if(!editingId || saving) return;
+    var b=$("fDel");
+    if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Confirmar"; setTimeout(function(){ b.textContent="Apagar"; delete b.dataset.sure; },3000); return; }
+    setBusy(true);
+    api("DELETE","eventos?id=eq."+encodeURIComponent(editingId)).then(function(){
+      events=events.filter(function(x){ return x.id!==editingId; });
+      setBusy(false); closeSheet(); render(); toast("Evento apagado");
+    }).catch(function(e){ setBusy(false); var m=failMsg(e); if(m) formMsg(m); });
   });
 
+  /* ---------- exportar ---------- */
   function csvCell(v){
     var t=String(v==null?"":v);
     if(/^[=+\-@\t\r]/.test(t)) t="'"+t;
@@ -354,20 +457,18 @@
       var d=parse(e.date);
       rows.push([pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(), e.name, e.guests||"", e.local||"", e.val?e.val.toFixed(2).replace(".",","):"", e.paid?"Sim":"Não"]);
     });
-    var csv="\uFEFF"+rows.map(function(r){ return r.map(csvCell).join(";"); }).join("\r\n");
+    var csv="﻿"+rows.map(function(r){ return r.map(csvCell).join(";"); }).join("\r\n");
     var blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
     var url=URL.createObjectURL(blob), a=document.createElement("a");
-    var n=new Date();
-    a.href=url; a.download="agenda-chef-pitty-"+iso(n)+".csv";
+    a.href=url; a.download="agenda-chef-pitty-"+iso(new Date())+".csv";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); },2000);
     toast("Agenda exportada");
   });
 
-  $("reset").addEventListener("click", function(){ events=samples(); save(); filter="todos"; document.querySelectorAll(".chip").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-f")==="todos"?"true":"false"); }); render(); toast("Exemplos restaurados"); });
-  $("clear").addEventListener("click", function(){ events=[]; save(); render(); toast("Agenda limpa"); });
-
-  render();
+  /* ---------- início ---------- */
+  session = loadSession();
+  if(session){ showApp(); loadEvents(); } else { showLogin(); }
 })();
 </script>
 </body>
