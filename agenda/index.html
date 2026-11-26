@@ -138,6 +138,48 @@
   .loading .retry{margin-top:14px;border:1px solid var(--line);border-radius:30px;padding:10px 20px;color:var(--gold-soft);font-weight:600}
   [hidden]{display:none !important}
   .login-logo{display:block}
+
+  .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:4px;margin-top:18px}
+  .seg button{flex:1;height:42px;border-radius:26px;color:var(--ink-muted);font-weight:600;font-size:.92rem}
+  .seg button[aria-pressed="true"]{background:var(--gold);color:#1a120a}
+  .cal-head{display:flex;align-items:center;gap:8px;margin-top:22px}
+  .cal-title{flex:1;text-align:center;font-family:var(--serif);font-size:1.7rem;text-transform:capitalize;letter-spacing:-.01em;line-height:1.1}
+  .cal-title small{font-family:var(--sans);font-size:.8rem;color:var(--ink-faint);margin-left:6px}
+  .cal-nav{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;font-size:1.4rem;line-height:1;color:var(--ink)}
+  .cal-nav:hover{border-color:var(--gold)}
+  .cal-today{height:44px;padding:0 14px;border:1px solid var(--line);border-radius:30px;color:var(--gold-soft);font-weight:600;font-size:.85rem}
+  .cal-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;text-align:center;font-size:.7rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+  .cal-day{min-height:58px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px 3px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:left;transition:border-color .15s}
+  .cal-day:hover{border-color:rgba(198,142,57,.5)}
+  .cal-day.out{background:transparent;border-color:transparent;pointer-events:none}
+  .cal-day .dn{font-size:.88rem;font-weight:600;width:26px;height:26px;display:grid;place-items:center;border-radius:50%}
+  .cal-day.today .dn{background:var(--gold);color:#1a120a}
+  .cal-day.sel{border-color:var(--gold-soft);box-shadow:0 0 0 1px var(--gold-soft)}
+  .cal-day.past .dn{opacity:.55}
+  .dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:100%}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .dot.ok{background:var(--herb-soft)} .dot.pend{background:var(--warn)}
+  .cevs{display:none}
+  .cal-legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:.78rem;color:var(--ink-muted)}
+  .cal-legend span{display:inline-flex;align-items:center;gap:6px}
+  .day-panel{margin-top:24px}
+  .day-panel h3{font-family:var(--serif);font-weight:400;font-size:1.6rem;line-height:1.15}
+  .day-panel h3::first-letter{text-transform:uppercase}
+  .day-panel .none{color:var(--ink-muted);font-size:.92rem;margin-top:8px}
+  .day-panel .list{margin-top:12px}
+  .add-day{margin-top:12px;width:100%;height:52px;border:1px dashed rgba(198,142,57,.6);border-radius:14px;color:var(--gold-soft);font-weight:600}
+  .add-day:hover{background:rgba(198,142,57,.1)}
+  @media(min-width:640px){
+    .cal-day{min-height:104px;align-items:stretch;padding:6px}
+    .cal-day .dn{align-self:flex-start}
+    .dots{display:none}
+    .cevs{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .cev{display:block;font-size:.72rem;padding:3px 6px;border-radius:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:600}
+    .cev.ok{background:rgba(91,179,138,.18);color:var(--herb-soft)}
+    .cev.pend{background:rgba(224,131,74,.18);color:var(--warn)}
+    .cmore{font-size:.7rem;color:var(--ink-muted);padding-left:4px}
+  }
 </style>
 </head>
 <body class="is-auth">
@@ -170,6 +212,11 @@
 
 <main class="wrap">
   <div class="stats" id="stats"></div>
+
+  <div class="seg" role="group" aria-label="Modo de visualização">
+    <button type="button" data-view="lista" aria-pressed="true">Lista</button>
+    <button type="button" data-view="cal" aria-pressed="false">Calendário</button>
+  </div>
 
   <div class="chips" role="group" aria-label="Filtrar eventos">
     <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
@@ -229,7 +276,7 @@
   var SKEY = "chefpitty_agenda_session_v1";
   var MONTHS = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
   var WD = ["dom","seg","ter","qua","qui","sex","sáb"];
-  var filter = "todos", editingId = null, dupOk = false, events = [], session = null, saving = false;
+  var VKEY="chefpitty_agenda_view_v1", view="lista", calMonth=(function(){var t=new Date();return new Date(t.getFullYear(),t.getMonth(),1);})(), selDay=iso(new Date()), filter = "todos", editingId = null, dupOk = false, events = [], session = null, saving = false;
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
@@ -238,6 +285,9 @@
   function parse(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
   function brl(n){ return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
   function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("show");},2400); }
+
+  try{ if(localStorage.getItem(VKEY)==="cal") view="cal"; }catch(e){}
+  function syncSeg(){ document.querySelectorAll(".seg button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-view")===view?"true":"false"); }); }
 
   /* ---------- sessão ---------- */
   function loadSession(){ try{ var r=localStorage.getItem(SKEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
@@ -271,7 +321,7 @@
       return fetch(SUPA_URL+"/rest/v1/"+path, { method:method, headers:h, body: body?JSON.stringify(body):undefined }).catch(function(){ throw netError(); });
     }).then(function(r){
       if(r.status===401 && !retried){ return refresh().then(function(){ return api(method,path,body,true); }); }
-      if(!r.ok){ return r.text().then(function(t){ var e=new Error("Não foi possível concluir (erro "+r.status+")."); e.status=r.status; throw e; }); }
+      if(!r.ok){ return r.text().then(function(t){ var det=""; try{ var j=JSON.parse(t); det=[j.code,j.message].filter(Boolean).join(": "); }catch(x){} var e=new Error("Não foi possível concluir (erro "+r.status+")."+(det?" Detalhe: "+det:"")); e.status=r.status; throw e; }); }
       return r.status===204 ? null : r.json();
     });
   }
@@ -334,6 +384,7 @@
 
     var list = sorted.filter(function(e){ return filter==="todos" || (filter==="pend" && !e.paid) || (filter==="pago" && e.paid); });
     var app=$("app");
+    if(view==="cal"){ renderCal(list, today); return; }
     if(!list.length){
       app.innerHTML='<div class="empty"><b>'+(events.length?'Nenhum evento neste filtro':'Sua agenda está vazia')+'</b>'+(events.length?'Toque em "Todos" para ver tudo.':'Toque em "Novo evento" para cadastrar o primeiro.')+'</div>';
       return;
@@ -360,6 +411,79 @@
     app.innerHTML=html;
   }
 
+
+  /* ---------- calendário ---------- */
+  function evCard(e, today){
+    var d=parse(e.date), past=d<today, meta=[];
+    if(e.guests) meta.push(e.guests+" convidados"); if(e.local) meta.push(esc(e.local));
+    return '<button class="ev'+(past?' past':'')+'" data-id="'+esc(e.id)+'">'+
+      '<div class="date"><span class="d">'+pad(d.getDate())+'</span><span class="w">'+WD[d.getDay()]+'</span></div>'+
+      '<div><div class="name">'+esc(e.name)+'</div>'+
+      '<div class="full">'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+'</div>'+
+      (meta.length?'<div class="meta">'+meta.join(" · ")+'</div>':'')+
+      '<div class="row"><span class="badge '+(e.paid?'ok':'pend')+'">'+(e.paid?'Entrada paga':'Falta entrada')+'</span>'+
+      (e.val?'<span class="val">Reserva '+brl(e.val)+'</span>':'')+'</div></div></button>';
+  }
+  function renderCal(list, today){
+    var y=calMonth.getFullYear(), m=calMonth.getMonth();
+    var offset=new Date(y,m,1).getDay(), ndays=new Date(y,m+1,0).getDate();
+    var total=Math.ceil((offset+ndays)/7)*7, todayIso=iso(today), byDay={};
+    list.forEach(function(e){ (byDay[e.date]=byDay[e.date]||[]).push(e); });
+    var h='<div class="cal-head"><button class="cal-nav" data-act="prev" type="button" aria-label="Mês anterior">&#8249;</button>'+
+      '<div class="cal-title">'+MONTHS[m]+'<small>'+y+'</small></div>'+
+      '<button class="cal-nav" data-act="next" type="button" aria-label="Próximo mês">&#8250;</button>'+
+      '<button class="cal-today" data-act="today" type="button">Hoje</button></div>';
+    h+='<div class="cal-wd">'+WD.map(function(w){return '<div>'+w+'</div>';}).join("")+'</div><div class="cal-grid">';
+    for(var i=0;i<total;i++){
+      var n=i-offset+1;
+      if(n<1||n>ndays){ h+='<div class="cal-day out"></div>'; continue; }
+      var key=y+"-"+pad(m+1)+"-"+pad(n), evs=byDay[key]||[];
+      var cls="cal-day"+(key===todayIso?" today":"")+(key===selDay?" sel":"")+(key<todayIso?" past":"");
+      var label=n+" de "+MONTHS[m]+(evs.length?", "+evs.length+(evs.length===1?" evento":" eventos"):"");
+      h+='<button type="button" class="'+cls+'" data-act="day" data-date="'+key+'" aria-label="'+esc(label)+'"><span class="dn">'+n+'</span>';
+      if(evs.length){
+        h+='<div class="dots">'+evs.slice(0,4).map(function(e){return '<i class="dot '+(e.paid?'ok':'pend')+'"></i>';}).join("")+'</div>';
+        h+='<div class="cevs">'+evs.slice(0,3).map(function(e){return '<span class="cev '+(e.paid?'ok':'pend')+'">'+esc(e.name)+'</span>';}).join("")+(evs.length>3?'<span class="cmore">+'+(evs.length-3)+' mais</span>':'')+'</div>';
+      }
+      h+='</button>';
+    }
+    h+='</div><div class="cal-legend"><span><i class="dot pend"></i>Falta entrada</span><span><i class="dot ok"></i>Entrada paga</span></div>';
+    // painel do dia
+    if(selDay){
+      var sd=parse(selDay), dayEvs=byDay[selDay]||[];
+      h+='<div class="day-panel"><h3>'+sd.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h3>';
+      if(dayEvs.length) h+='<div class="list">'+dayEvs.map(function(e){return evCard(e,today);}).join("")+'</div>';
+      else h+='<p class="none">Nenhum evento neste dia.</p>';
+      h+='<button class="add-day" type="button" data-act="addday">+ Novo evento neste dia</button></div>';
+    } else {
+      h+='<div class="day-panel"><p class="none">Toque em um dia para ver os eventos.</p></div>';
+    }
+    $("app").innerHTML=h;
+  }
+  function setView(v){
+    view=v; try{ localStorage.setItem(VKEY,v); }catch(e){}
+    syncSeg(); render();
+  }
+  document.querySelector(".seg").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(b) setView(b.getAttribute("data-view"));
+  });
+  $("app").addEventListener("click", function(e){
+    var a=e.target.closest("[data-act]"); if(!a) return;
+    var act=a.getAttribute("data-act");
+    if(act==="prev"||act==="next"){
+      calMonth=new Date(calMonth.getFullYear(), calMonth.getMonth()+(act==="next"?1:-1), 1);
+      var t=new Date(); selDay=(calMonth.getFullYear()===t.getFullYear()&&calMonth.getMonth()===t.getMonth())?iso(t):null;
+      render();
+    } else if(act==="today"){
+      var n=new Date(); calMonth=new Date(n.getFullYear(), n.getMonth(), 1); selDay=iso(n); render();
+    } else if(act==="day"){
+      selDay=a.getAttribute("data-date"); render();
+      var p=document.querySelector(".day-panel"); if(p && p.scrollIntoView) p.scrollIntoView({behavior:"smooth",block:"nearest"});
+    } else if(act==="addday"){
+      openSheet(null, selDay);
+    }
+  });
+
   /* ---------- formulário ---------- */
   function setPaid(v){ $("fPaid").setAttribute("aria-pressed", v?"true":"false"); $("fPaidS").textContent = v?"Entrada recebida":"Ainda falta a entrada"; }
   function isPaid(){ return $("fPaid").getAttribute("aria-pressed")==="true"; }
@@ -372,13 +496,13 @@
   function formMsg(t){ var d=$("dup"); if(t){ d.textContent=t; d.classList.add("show"); } else d.classList.remove("show"); }
   function setBusy(b){ saving=b; $("fSave").disabled=b; $("fDel").disabled=b; $("fSave").textContent=b?"Salvando...":"Salvar"; }
 
-  function openSheet(id){
+  function openSheet(id, presetDate){
     editingId=id||null; dupOk=false; setBusy(false); formMsg("");
     $("eName").classList.remove("show"); $("eDate").classList.remove("show");
     var e = id ? events.filter(function(x){return x.id===id;})[0] : null;
     $("ftitle").textContent = e ? "Editar evento" : "Novo evento";
     $("fName").value = e?e.name:"";
-    $("fDate").value = e?e.date:"";
+    $("fDate").value = e?e.date:(presetDate||"");
     $("fGuests").value = e&&e.guests?e.guests:"";
     $("fLocal").value = e?e.local:"";
     $("fVal").value = e&&e.val ? e.val.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
@@ -429,6 +553,7 @@
       var saved = rows && rows[0] ? fromDb(rows[0]) : null;
       if(!saved) throw new Error("Não foi possível salvar. Tente de novo.");
       if(editingId) events = events.map(function(x){ return x.id===editingId ? saved : x; }); else events.push(saved);
+      if(view==="cal"){ var sdt=parse(saved.date); calMonth=new Date(sdt.getFullYear(), sdt.getMonth(), 1); selDay=saved.date; }
       setBusy(false); closeSheet(); render(); toast(editingId?"Evento atualizado":"Evento salvo");
     }).catch(function(e){ setBusy(false); var m=failMsg(e); if(m) formMsg(m); });
   });
@@ -467,6 +592,7 @@
   });
 
   /* ---------- início ---------- */
+  syncSeg();
   session = loadSession();
   if(session){ showApp(); loadEvents(); } else { showLogin(); }
 })();
